@@ -1,0 +1,29 @@
+WITH Combined AS (
+    SELECT
+        s.*,
+        ch.id AS charger_id,
+        og.customerName,
+        c.charge_box_id,
+        c.connector_id,
+        t.stop_value,
+        t.stop_timestamp,
+        LAG(t.stop_value) OVER (PARTITION BY s.connector_pk ORDER BY t.event_timestamp) AS prev_stop_value
+    FROM ocpp.transaction_start AS s
+    JOIN ocpp.transaction_stop AS t
+    ON s.transaction_pk = t.transaction_pk
+    LEFT JOIN ocpp.connector AS c
+    ON s.connector_pk = c.connector_pk
+     left JOIN `charging-management`.chargers AS ch
+     ON c.charge_box_id = ch.name
+     LEFT JOIN `charging-management`.sites AS st
+    ON ch.id = st.id
+    LEFT JOIN `charging-management`.organizations AS og
+    ON st.organization_id = og.id
+)
+SELECT
+    *,
+    COALESCE(start_value - prev_stop_value, 0) AS difference
+FROM Combined
+WHERE MONTH(stop_timestamp) = 12 
+ORDER BY connector_pk ASC, stop_timestamp ASC -- Replace `MONTH()` with appropriate function for your database
+-- limit 50;
