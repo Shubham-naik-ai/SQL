@@ -27,3 +27,18 @@ FROM Combined
 WHERE MONTH(stop_timestamp) = 12 
 ORDER BY connector_pk ASC, stop_timestamp ASC -- Replace `MONTH()` with appropriate function for your database
 -- limit 50;
+
+
+***************************************************====================***************************************************************
+
+SELECT distinct(vehicle_id),min(can_odo), max(can_odo), min(can_odo) - max(can_odo) as Total  FROM `msrtc-operation`.vehicledata
+group by vehicle_id
+having min(can_odo) > 1
+order by Total asc
+limit 100
+
+SELECT distinct(vehicle_id),min(can_odo), max(can_odo), max(can_odo) - min(can_odo) as Total  FROM `msrtc-operation`.vehicledata
+group by vehicle_id
+-- having min(can_odo) > 1
+order by Total desc
+limit 300
